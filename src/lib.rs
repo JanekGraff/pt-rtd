@@ -1,4 +1,4 @@
-#![no_std]
+#![cfg_attr(not(test), no_std)]
 
 //! Calculation methods for platinum type RTD temperature sensors.
 //! 
@@ -62,7 +62,7 @@ const B: f32 = -5.7750e-7;
 const C: f32 = -4.1830e-12;
 
 /// Calculate temperature of RTD from resistance value.
-/// 
+///
 /// Allowed temperature range: -200–850°C.
 #[allow(dead_code)]
 pub fn calc_t(r: f32, r_0: RTDType) -> Result<f32, Error> {
@@ -123,7 +123,7 @@ pub fn conv_d_val_to_r(d_val: u32, r_ref: u32, res: ADCRes, pga_gain: u32) -> Re
 #[allow(dead_code)]
 fn poly_correction(r: f32, poly: Polynomial) -> f32 {
     let mut res = 0_f32;
-    for (i, factor) in poly.iter().enumerate() {
+    for (i, factor) in poly.iter().rev().enumerate() {
         res += factor * powf(r, i as f32);
     };    
     res
@@ -153,5 +153,39 @@ mod tests {
 
         let t = calc_t(r, RTDType::PT100).unwrap();
         assert_eq!(t, 0_f32);
+    }
+
+    #[test]
+    fn negative_temperature() {
+        let r = 99.0;
+
+        let t = calc_t(r, RTDType::PT100).unwrap();
+        dbg!(t);
+        assert!(t < 0_f32);
+    }
+
+    #[test]
+    fn test_range_for_all_types() {
+        test_range(18, 390, RTDType::PT100);
+        // FIXME: Add tests for PT200 + PT500 once their polynomials are added
+        test_range(185, 3904, RTDType::PT1000);
+    }
+
+    fn test_range(r_min: i32, r_max: i32, rtd_type: RTDType) {
+        // Calculate the first result
+        let mut prev_result = calc_t(r_min as f32, rtd_type).unwrap();
+
+        for r in r_min + 1..r_max + 1 {
+            let res = calc_t(r as f32, rtd_type).unwrap();
+            dbg!(r, res, prev_result);
+
+            // Result needs to be larger than the previous result
+            assert!(res > prev_result);
+
+            // Check the conversion backwards (calculate resistance value from the temperature result)
+            // Add 0.5 to the resistance to round the result instead of flooring when casting to i32
+            assert_eq!((calc_r(res, rtd_type).unwrap() + 0.5) as i32, r);
+            prev_result = res;
+        }
     }
 }
