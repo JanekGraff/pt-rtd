@@ -154,4 +154,13 @@ mod tests {
         let t = calc_t(r, RTDType::PT100).unwrap();
         assert_eq!(t, 0_f32);
     }
+
+    #[test]
+    fn negative_temperature() {
+        let r = 99.0;
+
+        let t = calc_t(r, RTDType::PT100).unwrap();
+        dbg!(t);
+        assert!(t < 0_f32);
+    }
 }
