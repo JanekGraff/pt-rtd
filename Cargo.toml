@@ -14,3 +14,7 @@ repository = "https://github.com/thecodechemist99/pt-rtd"
 
 [dependencies]
 libm = "0.2.6"
+defmt = { version = "*", optional = true }
+
+[features]
+defmt = ["dep:defmt"]
