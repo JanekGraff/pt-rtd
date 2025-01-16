@@ -130,6 +130,7 @@ fn poly_correction(r: f32, poly: Polynomial) -> f32 {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Error {
     OutOfBounds,
     NonexistentType,
