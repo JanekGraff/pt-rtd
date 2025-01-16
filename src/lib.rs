@@ -62,7 +62,7 @@ const B: f32 = -5.7750e-7;
 const C: f32 = -4.1830e-12;
 
 /// Calculate temperature of RTD from resistance value.
-/// 
+///
 /// Allowed temperature range: -200–850°C.
 #[allow(dead_code)]
 pub fn calc_t(r: f32, r_0: RTDType) -> Result<f32, Error> {
@@ -123,7 +123,7 @@ pub fn conv_d_val_to_r(d_val: u32, r_ref: u32, res: ADCRes, pga_gain: u32) -> Re
 #[allow(dead_code)]
 fn poly_correction(r: f32, poly: Polynomial) -> f32 {
     let mut res = 0_f32;
-    for (i, factor) in poly.iter().enumerate() {
+    for (i, factor) in poly.iter().rev().enumerate() {
         res += factor * powf(r, i as f32);
     };    
     res
