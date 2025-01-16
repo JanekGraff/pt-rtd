@@ -165,15 +165,18 @@ mod tests {
     }
 
     #[test]
-    fn test_range() {
-        let r_start = 18;
-        let r_end = 390;
+    fn test_range_for_all_types() {
+        test_range(18, 390, RTDType::PT100);
+        // FIXME: Add tests for PT200 + PT500 once their polynomials are added
+        test_range(185, 3904, RTDType::PT1000);
+    }
 
+    fn test_range(r_min: i32, r_max: i32, rtd_type: RTDType) {
         // Calculate the first result
-        let mut prev_result = calc_t(r_start as f32, RTDType::PT100).unwrap();
+        let mut prev_result = calc_t(r_min as f32, rtd_type).unwrap();
 
-        for r in r_start + 1..r_end + 1 {
-            let res = calc_t(r as f32, RTDType::PT100).unwrap();
+        for r in r_min + 1..r_max + 1 {
+            let res = calc_t(r as f32, rtd_type).unwrap();
             dbg!(r, res, prev_result);
 
             // Result needs to be larger than the previous result
@@ -181,7 +184,7 @@ mod tests {
 
             // Check the conversion backwards (calculate resistance value from the temperature result)
             // Add 0.5 to the resistance to round the result instead of flooring when casting to i32
-            assert_eq!((calc_r(res, RTDType::PT100).unwrap() + 0.5) as i32, r);
+            assert_eq!((calc_r(res, rtd_type).unwrap() + 0.5) as i32, r);
             prev_result = res;
         }
     }
