@@ -163,4 +163,26 @@ mod tests {
         dbg!(t);
         assert!(t < 0_f32);
     }
+
+    #[test]
+    fn test_range() {
+        let r_start = 18;
+        let r_end = 390;
+
+        // Calculate the first result
+        let mut prev_result = calc_t(r_start as f32, RTDType::PT100).unwrap();
+
+        for r in r_start + 1..r_end + 1 {
+            let res = calc_t(r as f32, RTDType::PT100).unwrap();
+            dbg!(r, res, prev_result);
+
+            // Result needs to be larger than the previous result
+            assert!(res > prev_result);
+
+            // Check the conversion backwards (calculate resistance value from the temperature result)
+            // Add 0.5 to the resistance to round the result instead of flooring when casting to i32
+            assert_eq!((calc_r(res, RTDType::PT100).unwrap() + 0.5) as i32, r);
+            prev_result = res;
+        }
+    }
 }
