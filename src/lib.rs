@@ -1,4 +1,4 @@
-#![no_std]
+#![cfg_attr(not(test), no_std)]
 
 //! Calculation methods for platinum type RTD temperature sensors.
 //! 
